@@ -153,27 +153,27 @@ impl Interpreter {
         let start = self.data_pointer.saturating_sub(range);
         let end = (self.data_pointer + range + 1).min(Self::MEMORY_SIZE);
 
-        print!("Addr:");
+        eprint!("Addr:");
         for i in start..end {
-            print!("{:>7}", i);
+            eprint!("{:>7}", i);
         }
-        println!();
+        eprintln!();
 
-        print!("Data:");
+        eprint!("Data:");
         for i in start..end {
-            print!("{:>7}", self.memory[i]);
+            eprint!("{:>7}", self.memory[i]);
         }
-        println!();
+        eprintln!();
 
-        print!("Ptrs:");
+        eprint!("Ptrs:");
         for i in start..end {
             if i == self.data_pointer {
-                print!("  ^^^^^");
+                eprint!("  ^^^^^");
             } else {
-                print!("       ");
+                eprint!("       ");
             }
         }
-        println!();
+        eprintln!();
     }
 
     fn show_cell(&self, data_pointer: usize) {
@@ -188,11 +188,11 @@ impl Interpreter {
 fn run_repl() -> Result<(), String> {
     let mut interpreter = Interpreter::new();
 
-    println!("Brainfuck REPL");
-    println!("Type 'exit' to exit, or 'mem' to show memory snapshot.");
+    eprintln!("Brainfuck REPL");
+    eprintln!("Type 'exit' to exit, or 'mem' to show memory snapshot.");
 
     loop {
-        print!("> ");
+        eprint!("> ");
         io::stdout().flush().map_err(|e| e.to_string())?;
 
         let mut input = String::new();
@@ -202,7 +202,7 @@ fn run_repl() -> Result<(), String> {
             .map_err(|e| e.to_string())?;
 
         if bytes_read == 0 {
-            println!();
+            eprintln!();
             break;
         }
 
@@ -304,7 +304,7 @@ fn run_repl() -> Result<(), String> {
         match interpreter.run(&tokens, &jump_table) {
             Ok(_) => {
                 if tokens.contains(&Token::Output) {
-                    println!();
+                    eprintln!();
                 } else {
                     interpreter.show_current_cell();
                 }
@@ -329,7 +329,7 @@ fn run_file(filename: &str) -> Result<(), String> {
     let mut interpreter = Interpreter::new();
 
     interpreter.run(&tokens, &jump_table)?;
-    println!();
+    eprintln!();
 
     Ok(())
 }
