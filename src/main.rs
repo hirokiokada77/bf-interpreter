@@ -231,10 +231,14 @@ fn run_repl() -> Result<(), String> {
 
         match interpreter.run(&tokens, &jump_table) {
             Ok(_) => {
-                println!(
-                    "Cell[DP={}] = {}",
-                    interpreter.data_pointer, interpreter.memory[interpreter.data_pointer]
-                );
+                if tokens.contains(&Token::Output) {
+                    println!();
+                } else {
+                    println!(
+                        "Cell[DP={}] = {}",
+                        interpreter.data_pointer, interpreter.memory[interpreter.data_pointer]
+                    );
+                }
             }
             Err(e) => {
                 eprintln!("{}", e);
