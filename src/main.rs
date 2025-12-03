@@ -175,6 +175,14 @@ impl Interpreter {
         }
         println!();
     }
+
+    fn show_cell(&self, data_pointer: usize) {
+        eprintln!("Cell[{}] = {}", data_pointer, self.memory[data_pointer]);
+    }
+
+    fn show_current_cell(&self) {
+        self.show_cell(self.data_pointer);
+    }
 }
 
 fn run_repl() -> Result<(), String> {
@@ -204,12 +212,76 @@ fn run_repl() -> Result<(), String> {
             continue;
         }
 
-        match bf_code {
+        let parts: Vec<&str> = bf_code.split_whitespace().collect();
+        let command = parts.first().unwrap_or(&"");
+
+        match *command {
             "quit" | "exit" => {
                 break;
             }
             "mem" | "memory" => {
                 interpreter.print_memory_snapshot(5);
+                continue;
+            }
+            "show" => {
+                if let Some(addr_str) = parts.get(1) {
+                    match addr_str.parse::<usize>() {
+                        Ok(addr) if addr < Interpreter::MEMORY_SIZE => {
+                            interpreter.show_cell(addr);
+                        }
+                        Ok(addr) => {
+                            eprintln!(
+                                "Address {} is out of bounds (0-{})",
+                                addr,
+                                Interpreter::MEMORY_SIZE - 1
+                            );
+                        }
+                        Err(_) => {
+                            eprintln!("Invalid address format");
+                        }
+                    }
+                } else {
+                    interpreter.show_current_cell();
+                }
+                continue;
+            }
+            "jump" => {
+                if let Some(addr_str) = parts.get(1) {
+                    match addr_str.parse::<usize>() {
+                        Ok(addr) if addr < Interpreter::MEMORY_SIZE => {
+                            interpreter.data_pointer = addr;
+                            interpreter.show_current_cell();
+                        }
+                        Ok(addr) => {
+                            eprintln!(
+                                "Address {} is out of bounds (0-{})",
+                                addr,
+                                Interpreter::MEMORY_SIZE - 1
+                            );
+                        }
+                        Err(_) => {
+                            eprintln!("Invalid address format");
+                        }
+                    }
+                } else {
+                    eprintln!("Usage: jump <address>");
+                }
+                continue;
+            }
+            "set" => {
+                if let Some(value_str) = parts.get(1) {
+                    match value_str.parse::<u8>() {
+                        Ok(value) => {
+                            interpreter.memory[interpreter.data_pointer] = value;
+                            interpreter.show_current_cell();
+                        }
+                        Err(_) => {
+                            eprintln!("Invalid value format or value is out of u8 range (0-255)");
+                        }
+                    }
+                } else {
+                    eprintln!("Usage: set <value>");
+                }
                 continue;
             }
             _ => {}
@@ -234,10 +306,7 @@ fn run_repl() -> Result<(), String> {
                 if tokens.contains(&Token::Output) {
                     println!();
                 } else {
-                    println!(
-                        "Cell[DP={}] = {}",
-                        interpreter.data_pointer, interpreter.memory[interpreter.data_pointer]
-                    );
+                    interpreter.show_current_cell();
                 }
             }
             Err(e) => {
