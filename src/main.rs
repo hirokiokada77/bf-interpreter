@@ -176,12 +176,12 @@ impl Interpreter {
         eprintln!();
     }
 
-    fn show_cell(&self, data_pointer: usize) {
+    fn print_cell(&self, data_pointer: usize) {
         eprintln!("Cell[{}] = {}", data_pointer, self.memory[data_pointer]);
     }
 
-    fn show_current_cell(&self) {
-        self.show_cell(self.data_pointer);
+    fn print_current_cell(&self) {
+        self.print_cell(self.data_pointer);
     }
 }
 
@@ -227,7 +227,7 @@ fn run_repl() -> Result<(), String> {
                 if let Some(addr_str) = parts.get(1) {
                     match addr_str.parse::<usize>() {
                         Ok(addr) if addr < Interpreter::MEMORY_SIZE => {
-                            interpreter.show_cell(addr);
+                            interpreter.print_cell(addr);
                         }
                         Ok(addr) => {
                             eprintln!(
@@ -241,7 +241,7 @@ fn run_repl() -> Result<(), String> {
                         }
                     }
                 } else {
-                    interpreter.show_current_cell();
+                    interpreter.print_current_cell();
                 }
                 continue;
             }
@@ -250,7 +250,7 @@ fn run_repl() -> Result<(), String> {
                     match addr_str.parse::<usize>() {
                         Ok(addr) if addr < Interpreter::MEMORY_SIZE => {
                             interpreter.data_pointer = addr;
-                            interpreter.show_current_cell();
+                            interpreter.print_current_cell();
                         }
                         Ok(addr) => {
                             eprintln!(
@@ -273,7 +273,7 @@ fn run_repl() -> Result<(), String> {
                     match value_str.parse::<u8>() {
                         Ok(value) => {
                             interpreter.memory[interpreter.data_pointer] = value;
-                            interpreter.show_current_cell();
+                            interpreter.print_current_cell();
                         }
                         Err(_) => {
                             eprintln!("Invalid value format or value is out of u8 range (0-255)");
@@ -306,7 +306,7 @@ fn run_repl() -> Result<(), String> {
                 if tokens.contains(&Token::Output) {
                     eprintln!();
                 } else {
-                    interpreter.show_current_cell();
+                    interpreter.print_current_cell();
                 }
             }
             Err(e) => {
